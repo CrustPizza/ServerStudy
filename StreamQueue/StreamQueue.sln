@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StreamQueue", "StreamQueue\StreamQueue.vcxproj", "{30E09591-DFE5-45E6-8593-B2CE3354AFE2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestDemo", "TestDemo\TestDemo.vcxproj", "{150424AE-362E-484B-A8B3-5F802F529BD5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{30E09591-DFE5-45E6-8593-B2CE3354AFE2} = {30E09591-DFE5-45E6-8593-B2CE3354AFE2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
