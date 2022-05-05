@@ -11,6 +11,6 @@
 **2022. 05. 05**
 
  + StreamQueue.h
-  - 자료형에 맞춰서 Binary형태로 Read/Write하는 구조 설계
-  - <</>> 연산자 Overriding
-  - 예외처리 및 구조의 설계에 방향이 필요함
+   - 자료형에 맞춰서 Binary형태로 Read/Write하는 구조 설계
+   - <</>> 연산자 Overriding
+   - 예외처리 및 구조의 설계에 방향이 필요함
