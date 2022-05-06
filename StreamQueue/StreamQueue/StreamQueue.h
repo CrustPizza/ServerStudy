@@ -36,6 +36,9 @@ public:
 	template <typename T>
 	T Read(UINT size);
 
+	// 문자열로 전부 다 읽어온다.
+	std::string ReadAll();
+
 	// Write와 동일한 동작을 한다.
 	template <typename T>
 	StreamQueue& operator <<(T& data);
@@ -44,6 +47,15 @@ public:
 	// 다만 오른쪽 인수로 들어오는 자료형의 크기에 맞게 반환한다.
 	template <typename T>
 	StreamQueue& operator >>(T& data);
+
+	// 스트림의 상태를 확인하기 위한 함수들
+	UINT GetDataSize();
+	bool Empty();
+
+private:
+	// Head의 위치를 0으로 바꾸는 함수인데
+	// 이름이 Push도 이상하고 Sort도 이상하고..
+	void Rebuild();
 };
 
 template<UINT BufferSize>
@@ -68,11 +80,19 @@ inline bool StreamQueue<BufferSize>::Write(T& data)
 	UINT typeSize = sizeof(T);
 
 	// 버퍼에 저장이 불가능한 경우
-	if (typeSize > BufferSize - tailIndex)
+	if (typeSize > BufferSize - GetDataSize())
 	{
 		// 자료형을 통째로 넣는 것이기 때문에 분할해서 넣는 것은 힘들 것 같다.
 		// throw를 할지, assert를 할지, false를 할지 고민
 		return false;
+	}
+
+	// 저장은 가능하지만 버퍼를 정리할 필요가 있는 경우
+	if (typeSize > BufferSize - tailIndex)
+	{
+		// 환형 큐를 써도 되지만 직관적인 구조를 위해
+		// Head의 값이 Tail보다 크지 않은 상태를 유지한다.
+		Rebuild();
 	}
 
 	// reinterpret_cast를 통해서 비트 상태 그대로 저장 한다.
@@ -95,7 +115,7 @@ inline T StreamQueue<BufferSize>::Read(UINT size)
 	// T의 자료형이 char*, string과 같은 문자열 자료형일 때 다른 방식으로 동작하게 오버로딩을 해야할까?
 
 	// 원하는 값이 저장량보다 크면 안된다.
-	if (size > tailIndex - headIndex)
+	if (size > GetDataSize())
 	{
 		// 값을 반환해야하기 때문에 bool은 못쓰고
 		// throw나 assert
@@ -112,6 +132,14 @@ inline T StreamQueue<BufferSize>::Read(UINT size)
 	for (int i = 0; i < typeSize; i++)
 	{
 		*(reader + i) = buffer[headIndex++];
+	}
+
+	// 읽었을 때 Head와 Tail이 같은 위치라면
+	// 모든 데이터를 가져온 것이므로 0으로 초기화 시켜준다.
+	if (tailIndex == headIndex)
+	{
+		headIndex = 0;
+		tailIndex = 0;
 	}
 
 	return temp;
@@ -145,4 +173,36 @@ inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator>>(T& data)
 	data = Read<T>(sizeof(T));
 
 	return *this;
+}
+
+template<UINT BufferSize>
+inline UINT StreamQueue<BufferSize>::GetDataSize()
+{
+	// 현재 저장중인 데이터의 크기
+	return tailIndex - headIndex;
+}
+
+template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::Empty()
+{
+	// 현재 구조상 데이터가 없다면
+	// tailIndex == 0해도 비어있는지 확인이 가능하지만
+	// 혹시 모르니 사이즈로 체크
+	return GetDataSize() == 0;
+}
+
+template<UINT BufferSize>
+inline void StreamQueue<BufferSize>::Rebuild()
+{
+	int index = 0;
+
+	// 값을 앞으로 이동
+	while (headIndex == tailIndex)
+	{
+		buffer[index++] = buffer[headIndex++];
+	}
+
+	// 데이터를 가리키는 위치 변경
+	headIndex = 0;
+	tailIndex = index;
 }
