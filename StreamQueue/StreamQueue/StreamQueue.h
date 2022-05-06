@@ -2,11 +2,13 @@
 *	Stream Queue			*
 *							*
 *	Created : 2022/05/03	*
-*	Updated : 2022/05/05	*
+*	Updated : 2022/05/06	*
 *****************************/
 
 #pragma once
 #include <assert.h>
+#include <string>
+#include <typeinfo>
 
 // Type Define
 using UINT = unsigned int;
@@ -32,12 +34,15 @@ public:
 	template <typename T>
 	bool Write(T& data);
 
+	// String은 따로 overloading 해야된다. 
+	bool Write(std::string& data);
+
 	// Size만큼 값을 읽어서 T로 변환 후 반환
 	template <typename T>
 	T Read(UINT size);
 
 	// 문자열로 전부 다 읽어온다.
-	std::string ReadAll();
+	std::string ReadString();
 
 	// Write와 동일한 동작을 한다.
 	template <typename T>
@@ -51,6 +56,7 @@ public:
 	// 스트림의 상태를 확인하기 위한 함수들
 	UINT GetDataSize();
 	bool Empty();
+	void Clear();
 
 private:
 	// Head의 위치를 0으로 바꾸는 함수인데
@@ -77,7 +83,7 @@ template<UINT BufferSize>
 template<typename T>
 inline bool StreamQueue<BufferSize>::Write(T& data)
 {
-	UINT typeSize = sizeof(T);
+	UINT typeSize = sizeof(data);
 
 	// 버퍼에 저장이 불가능한 경우
 	if (typeSize > BufferSize - GetDataSize())
@@ -100,7 +106,36 @@ inline bool StreamQueue<BufferSize>::Write(T& data)
 
 	for (int i = 0; i < typeSize; i++)
 	{
-		buffer[tailIndex++] = *(writer + i);
+		buffer[tailIndex++] = writer[i];
+	}
+}
+
+template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::Write(std::string& data)
+{
+	// string의 경우에는 length
+	UINT typeSize = data.length();
+
+	// 버퍼에 저장이 불가능한 경우
+	if (typeSize > BufferSize - GetDataSize())
+	{
+		// 자료형을 통째로 넣는 것이기 때문에 분할해서 넣는 것은 힘들 것 같다.
+		// throw를 할지, assert를 할지, false를 할지 고민
+		return false;
+	}
+
+	// 저장은 가능하지만 버퍼를 정리할 필요가 있는 경우
+	if (typeSize > BufferSize - tailIndex)
+	{
+		// 환형 큐를 써도 되지만 직관적인 구조를 위해
+		// Head의 값이 Tail보다 크지 않은 상태를 유지한다.
+		Rebuild();
+	}
+
+	// 어차피 String에서 1바이트씩 읽어올 수 있으니 그냥 넣는다.
+	for (int i = 0; i < typeSize; i++)
+	{
+		buffer[tailIndex++] = data[i];
 	}
 }
 
@@ -131,18 +166,36 @@ inline T StreamQueue<BufferSize>::Read(UINT size)
 
 	for (int i = 0; i < typeSize; i++)
 	{
-		*(reader + i) = buffer[headIndex++];
+		reader[i] = buffer[headIndex++];
 	}
 
 	// 읽었을 때 Head와 Tail이 같은 위치라면
 	// 모든 데이터를 가져온 것이므로 0으로 초기화 시켜준다.
 	if (tailIndex == headIndex)
 	{
-		headIndex = 0;
-		tailIndex = 0;
+		Clear();
 	}
 
 	return temp;
+}
+
+template<UINT BufferSize>
+inline std::string StreamQueue<BufferSize>::ReadString()
+{
+	// 버퍼를 한번에 읽는 것도 필요할 것 같다
+	std::string str = "";
+
+	int size = GetDataSize();
+
+	for (int i = 0; i < size; i++)
+	{
+		str += buffer[headIndex++];
+	}
+
+	// 다 읽고나면 초기화
+	Clear();
+
+	return str;
 }
 
 template<UINT BufferSize>
@@ -161,6 +214,7 @@ inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator<<(T& data)
 	{
 		// 실패했을 때 무엇을 할 것인가
 		// TO DO
+		assert(!"There is no more space to store in the buffer.\n");
 	}
 }
 
@@ -169,8 +223,21 @@ template<typename T>
 inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator>>(T& data)
 {
 	// Read로 데이터를 전달한다.
-	// 성공적으로 함수가 동작했다면 반환값을 data에 넣는다.
-	data = Read<T>(sizeof(T));
+	// String의 경우에 한번에 값을 넣어주자
+	if (typeid(std::string) == typeid(T))
+	{
+		//data = ReadString();
+		// 아 이거 예전에도 겪어봤던 문제인데 아직 해결하지 못했다.
+		// Template 함수를 사용할 때 정해진 자료형을 사용하는 경우
+		// 실제로 해당 코드가 동작하지 않는 상황이라 하더라도
+		// 변환이 되지않으면 컴파일 오류가 나는 케이스가 있는데
+		// 어떻게 처리해주어야 할까..
+	}
+	else
+	{
+		// 성공적으로 함수가 동작했다면 반환값을 data에 넣는다.
+		data = Read<T>(sizeof(T));
+	}
 
 	return *this;
 }
@@ -192,12 +259,20 @@ inline bool StreamQueue<BufferSize>::Empty()
 }
 
 template<UINT BufferSize>
+inline void StreamQueue<BufferSize>::Clear()
+{
+	// 값을 0으로 초기화 해줄 필요는 없는거 같다
+	headIndex = 0;
+	tailIndex = 0;
+}
+
+template<UINT BufferSize>
 inline void StreamQueue<BufferSize>::Rebuild()
 {
 	int index = 0;
 
 	// 값을 앞으로 이동
-	while (headIndex == tailIndex)
+	while (headIndex != tailIndex)
 	{
 		buffer[index++] = buffer[headIndex++];
 	}

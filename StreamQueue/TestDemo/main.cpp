@@ -2,7 +2,7 @@
 *	Test for stream queue	*
 *							*
 *	Created : 2022/05/03	*
-*	Updated : 2022/05/05	*
+*	Updated : 2022/05/06	*
 *****************************/
 
 #include <iostream>
@@ -40,6 +40,27 @@ int main()
 		testClass >> d >> e >> f;
 
 		std::cout << "Int : " << d << "\tFloat : " << e << "\tChar : " << f << std::endl;
+
+		// 버퍼 오버런 테스트
+		//int arr[300] = {};
+
+		//for (int i = 0; i < 300; i++)
+		//{
+		//	arr[i] = i + 1;
+		//	testClass << arr[i];
+		//}
+
+		//testClass >> a;
+
+		// String 테스트
+		std::string test = "adfadfasdfadsfasdfasdfads";
+		std::string result;
+
+		testClass << test;
+		//testClass >> result;
+		result = testClass.ReadString();
+
+		std::cout << result << std::endl;
 	}
 
 	return 0;
