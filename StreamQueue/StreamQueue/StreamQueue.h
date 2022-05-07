@@ -1,8 +1,9 @@
 /****************************
-*	Stream Queue			*
+*							*
+*	Stream Queue.h			*
 *							*
 *	Created : 2022/05/03	*
-*	Updated : 2022/05/06	*
+*	Updated : 2022/05/07	*
 *****************************/
 
 #pragma once
@@ -34,15 +35,19 @@ public:
 	template <typename T>
 	bool Write(T& data);
 
-	// String은 따로 overloading 해야된다. 
+	// 문자열은 따로 overloading 해야된다. 
 	bool Write(std::string& data);
+	bool Write(const char* data, UINT length);
 
 	// Size만큼 값을 읽어서 T로 변환 후 반환
 	template <typename T>
 	T Read(UINT size);
 
+	// 문자열로 원하는 만큼만 읽어오기
+	const char* Read(UINT size);
+
 	// 문자열로 전부 다 읽어온다.
-	std::string ReadString();
+	const char* ReadAll();
 
 	// Write와 동일한 동작을 한다.
 	template <typename T>
@@ -53,8 +58,12 @@ public:
 	template <typename T>
 	StreamQueue& operator >>(T& data);
 
+	// 지정 자료형과 관련된 문제를 그냥 Overloading으로 해결
+	StreamQueue& operator >>(std::string& data);
+
 	// 스트림의 상태를 확인하기 위한 함수들
 	UINT GetDataSize();
+	bool Full();
 	bool Empty();
 	void Clear();
 
@@ -62,6 +71,8 @@ private:
 	// Head의 위치를 0으로 바꾸는 함수인데
 	// 이름이 Push도 이상하고 Sort도 이상하고..
 	void Rebuild();
+	bool WriteBufferCheck(UINT size);
+	bool ReadBufferCheck(UINT size);
 };
 
 template<UINT BufferSize>
@@ -116,20 +127,10 @@ inline bool StreamQueue<BufferSize>::Write(std::string& data)
 	// string의 경우에는 length
 	UINT typeSize = data.length();
 
-	// 버퍼에 저장이 불가능한 경우
-	if (typeSize > BufferSize - GetDataSize())
+	if (WriteBufferCheck(typeSize) != true)
 	{
-		// 자료형을 통째로 넣는 것이기 때문에 분할해서 넣는 것은 힘들 것 같다.
-		// throw를 할지, assert를 할지, false를 할지 고민
+		// 저장 공간이 부족하면 false가 반환된다.
 		return false;
-	}
-
-	// 저장은 가능하지만 버퍼를 정리할 필요가 있는 경우
-	if (typeSize > BufferSize - tailIndex)
-	{
-		// 환형 큐를 써도 되지만 직관적인 구조를 위해
-		// Head의 값이 Tail보다 크지 않은 상태를 유지한다.
-		Rebuild();
 	}
 
 	// 어차피 String에서 1바이트씩 읽어올 수 있으니 그냥 넣는다.
@@ -140,22 +141,27 @@ inline bool StreamQueue<BufferSize>::Write(std::string& data)
 }
 
 template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::Write(const char* data, UINT length)
+{
+	if (WriteBufferCheck(length) != true)
+	{
+		// 저장 공간이 부족하면 false가 반환된다.
+		return false;
+	}
+
+	// 어차피 String에서 1바이트씩 읽어올 수 있으니 그냥 넣는다.
+	for (int i = 0; i < length; i++)
+	{
+		buffer[tailIndex++] = data[i];
+	}
+}
+
+template<UINT BufferSize>
 template<typename T>
 inline T StreamQueue<BufferSize>::Read(UINT size)
 {
-	// 입력된 사이즈 만큼 읽어서 반환을 한다.
-	// size와 T의 크기가 다를 수도 있는데 그런 경우에 어떻게 처리를 해야할 것인가
-	// 서버에서 사용할 것을 생각한다면 당연히 문자열 데이터를 고려해야한다.
-	// 문자열 데이터는 당연히 1바이트씩 뽑는 것은 비효율적일 것이고..
-	// T의 자료형이 char*, string과 같은 문자열 자료형일 때 다른 방식으로 동작하게 오버로딩을 해야할까?
-
-	// 원하는 값이 저장량보다 크면 안된다.
-	if (size > GetDataSize())
-	{
-		// 값을 반환해야하기 때문에 bool은 못쓰고
-		// throw나 assert
-		assert(!"Cannot read more than data stored in buffer.\n");
-	}
+	if (ReadBufferCheck(size) != true)
+		; // Error
 
 	UINT typeSize = sizeof(T);
 
@@ -180,22 +186,33 @@ inline T StreamQueue<BufferSize>::Read(UINT size)
 }
 
 template<UINT BufferSize>
-inline std::string StreamQueue<BufferSize>::ReadString()
+inline const char* StreamQueue<BufferSize>::Read(UINT size)
 {
-	// 버퍼를 한번에 읽는 것도 필요할 것 같다
-	std::string str = "";
+	if (ReadBufferCheck(size) != true)
+		; // Error
 
-	int size = GetDataSize();
+	// 버퍼를 필요한 만큼 읽는 것도 필요할 것 같다
+	std::string str = "";
 
 	for (int i = 0; i < size; i++)
 	{
 		str += buffer[headIndex++];
 	}
 
-	// 다 읽고나면 초기화
-	Clear();
+	// 읽었을 때 Head와 Tail이 같은 위치라면
+	// 모든 데이터를 가져온 것이므로 0으로 초기화 시켜준다.
+	if (tailIndex == headIndex)
+	{
+		Clear();
+	}
 
-	return str;
+	return str.c_str();
+}
+
+template<UINT BufferSize>
+inline const char* StreamQueue<BufferSize>::ReadAll()
+{
+	return Read(GetDataSize());
 }
 
 template<UINT BufferSize>
@@ -232,6 +249,8 @@ inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator>>(T& data)
 		// 실제로 해당 코드가 동작하지 않는 상황이라 하더라도
 		// 변환이 되지않으면 컴파일 오류가 나는 케이스가 있는데
 		// 어떻게 처리해주어야 할까..
+		//decltype(data) str = ReadString();
+		//data = str;
 	}
 	else
 	{
@@ -243,10 +262,24 @@ inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator>>(T& data)
 }
 
 template<UINT BufferSize>
+inline StreamQueue<BufferSize>& StreamQueue<BufferSize>::operator>>(std::string& data)
+{
+	data = ReadAll();
+
+	return *this;
+}
+
+template<UINT BufferSize>
 inline UINT StreamQueue<BufferSize>::GetDataSize()
 {
 	// 현재 저장중인 데이터의 크기
 	return tailIndex - headIndex;
+}
+
+template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::Full()
+{
+	return BufferSize == GetDataSize();
 }
 
 template<UINT BufferSize>
@@ -280,4 +313,47 @@ inline void StreamQueue<BufferSize>::Rebuild()
 	// 데이터를 가리키는 위치 변경
 	headIndex = 0;
 	tailIndex = index;
+}
+
+template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::WriteBufferCheck(UINT size)
+{
+	// 버퍼에 저장이 불가능한 경우
+	if (size > BufferSize - GetDataSize())
+	{
+		// 자료형을 통째로 넣는 것이기 때문에 분할해서 넣는 것은 힘들 것 같다.
+		// throw를 할지, assert를 할지, false를 할지 고민
+		return false;
+	}
+
+	// 저장은 가능하지만 버퍼를 정리할 필요가 있는 경우
+	if (size > BufferSize - tailIndex)
+	{
+		// 환형 큐를 써도 되지만 직관적인 구조를 위해
+		// Head의 값이 Tail보다 크지 않은 상태를 유지한다.
+		Rebuild();
+	}
+
+	return true;
+}
+
+template<UINT BufferSize>
+inline bool StreamQueue<BufferSize>::ReadBufferCheck(UINT size)
+{
+	// 입력된 사이즈 만큼 읽어서 반환을 한다.
+	// size와 T의 크기가 다를 수도 있는데 그런 경우에 어떻게 처리를 해야할 것인가
+	// 서버에서 사용할 것을 생각한다면 당연히 문자열 데이터를 고려해야한다.
+	// 문자열 데이터는 당연히 1바이트씩 뽑는 것은 비효율적일 것이고..
+	// T의 자료형이 char*, string과 같은 문자열 자료형일 때 다른 방식으로 동작하게 오버로딩을 해야할까?
+
+	// 원하는 값이 저장량보다 크면 안된다.
+	if (size > GetDataSize())
+	{
+		// 값을 반환해야하기 때문에 bool은 못쓰고
+		// throw나 assert
+		assert(!"Cannot read more than data stored in buffer.\n");
+	}
+
+	// 문제 있을 때 assert가 동작해서 의미가 있을까 싶지만 나중을 위해서..
+	return true;
 }

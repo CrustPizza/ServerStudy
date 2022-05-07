@@ -10,7 +10,8 @@
 
 1. Template 함수에서 Template 자료형에 변환이 지원되지 않아서 생기는 문제
   + 지정된 자료형을 매개변수로 받는 함수를 사용할 때
-  + 지정된 자료형을 Template 자료형으로 반환할 때
+  + ~~지정된 자료형을 Template 자료형으로 반환할 때~~
+	- 함수를 Overloading하는 것으로 해결
   + Template 자료형으로 선언된 변수에 지정된 자료형을 저장할 때
 
 2. Pointer를 고려할 것인가? 고려한다면 어떤 식으로 다룰 것인가?
@@ -23,6 +24,13 @@
 ### __History__
 
 -----------
+
+**2022. 05. 07**
+
+- StreamQueue.h
+  + Read/Write에서 원하는 만큼만 읽고 쓸 수 있도록 수정
+  + Template 함수의 반환값으로 string을 지정해서 사용할 수 없는 문제 수정
+  + Full, WriteBufferCheck, ReadBufferCheck 함수 구현
 
 **2022. 05. 06**
 

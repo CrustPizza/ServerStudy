@@ -1,8 +1,9 @@
 /****************************
-*	Test for stream queue	*
+*	Test for stream queue   *
+*	main.cpp				*
 *							*
 *	Created : 2022/05/03	*
-*	Updated : 2022/05/06	*
+*	Updated : 2022/05/07	*
 *****************************/
 
 #include <iostream>
@@ -57,8 +58,8 @@ int main()
 		std::string result;
 
 		testClass << test;
-		//testClass >> result;
-		result = testClass.ReadString();
+		testClass >> result;
+		//result = testClass.ReadString();
 
 		std::cout << result << std::endl;
 	}
