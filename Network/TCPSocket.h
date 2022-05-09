@@ -7,14 +7,9 @@
 *****************************/
 
 #pragma once
-#include <WinSock2.h>
+#include "SocketInterface.h"
 
-class SocketInterface
+class TCPSocket : public SocketInterface
 {
-	SOCKET hSocket;
-	SOCKADDR_IN localAddr;
 
-protected:
-	SocketInterface();
-	~SocketInterface();
 };

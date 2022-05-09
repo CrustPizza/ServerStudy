@@ -10,7 +10,6 @@
 
 SocketInterface::SocketInterface()
 {
-	hSocket = INVALID_SOCKET;
 	ZeroMemory(&localAddr, sizeof(SOCKADDR_IN));
 }
 
