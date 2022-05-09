@@ -8,6 +8,12 @@
 
 -----------
 
+**2022. 05. 09**
+
+- Network Proejct 생성
+- Server Project 생성
+- Client Proejct 생성
+
 **2022. 05. 07**
 
  - Stream Queue 템플릿 관련 문제 수정
