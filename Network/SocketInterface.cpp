@@ -3,17 +3,61 @@
 *	Socket Interface.cpp	*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/09	*
+*	Updated : 2022/05/10	*
 *****************************/
 
 #include "SocketInterface.h"
+#include <iostream>
 
 SocketInterface::SocketInterface()
 {
+	hSocket = INVALID_SOCKET;
 	ZeroMemory(&localAddr, sizeof(SOCKADDR_IN));
 }
 
 SocketInterface::~SocketInterface()
 {
+	// 변수가 소멸된다면 소켓을 닫는다.
+	if (IsValid() == true)
+		closesocket(hSocket);
+}
 
+SocketInterface::SocketInterface(SocketInterface&& other) noexcept
+{
+	*this = std::move(other);
+}
+
+SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
+{
+	// 이동!
+	hSocket = other.hSocket;
+	localAddr = other.localAddr;
+
+	// 이동된 값 초기화
+	other.hSocket = INVALID_SOCKET;
+	ZeroMemory(&other.localAddr, sizeof(SOCKADDR_IN));
+}
+
+SOCKET SocketInterface::GetSocket()
+{
+	return hSocket;
+}
+
+bool SocketInterface::IsValid()
+{
+	return hSocket != INVALID_SOCKET;
+}
+
+void SocketInterface::Attachment(SOCKET socket)
+{
+	hSocket = socket;
+}
+
+SOCKET SocketInterface::Detachment()
+{
+	// 사실 이렇게 해도 되는지 자신이 없다.
+	// 이러면 주소도 같이 없어지는데, 소켓 없이 주소만 있는게 의미가 있나 싶은데
+	// 바인드를 다시 한다? 는 것도 가능성이 없지는 않은 것 같고..
+	// 아예 이동 연산하는 중에 주소를 초기화하지 않는 것도 괜찮지 않을까 생각이 든다.
+	return std::move(*this).GetSocket();
 }
