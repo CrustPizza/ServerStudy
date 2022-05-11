@@ -27,14 +27,14 @@
 
 **2022. 05. 07**
 
-- StreamQueue.h
+- StreamQueue
   + Read/Write에서 원하는 만큼만 읽고 쓸 수 있도록 수정
   + Template 함수의 반환값으로 string을 지정해서 사용할 수 없는 문제 수정
   + Full, WriteBufferCheck, ReadBufferCheck 함수 구현
 
 **2022. 05. 06**
 
-- StreamQueue.h
+- StreamQueue
   + Write 함수 String은 따로 동작하도록 Overloading
   + 버퍼를 한번에 문자열로 읽는 ReadString 함수 구현
   + GetDataSize(), Empty(), Clear() 스트림의 상태를 반환하는 함수들 구현
@@ -42,7 +42,7 @@
 
 **2022. 05. 05**
 
- - StreamQueue.h
+ - StreamQueue
    + 자료형에 맞춰서 Binary형태로 Read/Write하는 구조 설계
    + <</>> 연산자 Overriding
    + 예외처리 및 구조의 설계에 방향이 필요함

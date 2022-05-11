@@ -20,18 +20,30 @@
 
 -----------
 
+**2022. 05. 11**
+
+- SocketInterface
+  + 내부에 있던 SocketAddrIn 구조체를 Endpoint 클래스로 이동
+
+- TCPSocket
+  + Open / Bind / Connet / Close / Shutdown 구현
+
+- Endpoint
+  + IP 정보와 Port 번호를 다루기 위한 클래스 생성
+  + IP 주소 문자열과 Port 번호를 받는 생성자 사용
+
 **2022. 05. 10**
 
-- SocketInterface.h
+- SocketInterface
   + Socket 인터페이스 개선하여 옵션은 배제한 상태의 인터페이스로 구성
 
-- TCPSocket.h
+- TCPSocket
   + TCPSocket의 대략적인 인터페이스 설계
 
 **2022. 05. 09**
 
-- SocketInterface.h
+- SocketInterface
   + Socket의 기본 인터페이스
 
-- TCPSocket.h
+- TCPSocket
   + SocketInterface를 상속받아서 사용할 TCPSocket 클래스
