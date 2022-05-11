@@ -36,12 +36,13 @@ bool TCPSocket::Open()
     return true;
 }
 
-bool TCPSocket::Bind(SocketAddrIn& target)
+bool TCPSocket::Bind(Endpoint& target)
 {
     // 서버에서 통신을 위해 Listen 소켓을 생성할 때 사용
     // 처음에 Client 입장에서 연결 요청을 어디로 보내야할지 알아야하니까
     // IP 주소와 Port 번호가 있는 소켓이 있어야 한다.
-    if (bind(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target), sizeof(SocketAddrIn)) == SOCKET_ERROR)
+    int error = bind(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target.ipv4EndPoint), sizeof(Endpoint::SocketAddrIn));
+    if (error == SOCKET_ERROR)
     {
         // 예외 처리
         // TO DO
@@ -54,9 +55,10 @@ bool TCPSocket::Bind(SocketAddrIn& target)
     return true;
 }
 
-bool TCPSocket::Connect(SocketAddrIn& target)
+bool TCPSocket::Connect(Endpoint& target)
 {
-    if (connect(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target), sizeof(SocketAddrIn)) == SOCKET_ERROR)
+    int error = connect(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target.ipv4EndPoint), sizeof(Endpoint::SocketAddrIn));
+    if (error == SOCKET_ERROR)
     {
         // 예외 처리
         // TO DO
@@ -74,12 +76,19 @@ bool TCPSocket::Connect(SocketAddrIn& target)
 
 void TCPSocket::Close()
 {
-
+    if (IsValid() == true)
+    {
+        closesocket(fileDescriptor);
+        fileDescriptor = INVALID_SOCKET;
+    }
 }
 
 void TCPSocket::Shutdown(int option)
 {
-
+    // 연결을 끊기 위해 사용하고 핸들은 해제되지 않는다.
+    // 그리고 closesocket 함수의 내부에서 shutdown이 호출된다고 한다.
+    // 즉, 소켓을 재사용할게 아닌 이상 내가 이 함수를 따로 호출할 일은 없다는 뜻?
+    shutdown(fileDescriptor, option);
 }
 
 int TCPSocket::Recv(char* buffer, int size, int& error)
@@ -97,7 +106,7 @@ bool TCPSocket::Listen()
     return false;
 }
 
-SOCKET TCPSocket::Accept(SocketAddrIn& target)
+SOCKET TCPSocket::Accept(Endpoint& target)
 {
     return SOCKET();
 }

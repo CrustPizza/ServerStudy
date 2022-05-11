@@ -18,8 +18,8 @@ public:
 
 	// Standard
 	bool	Open() override;
-	bool	Bind(SocketAddrIn& target) override;
-	bool	Connect(SocketAddrIn& target) override;
+	bool	Bind(Endpoint& target) override;
+	bool	Connect(Endpoint& target) override;
 
 	void	Close() override;
 	void	Shutdown(int option = SD_BOTH) override;
@@ -30,5 +30,5 @@ public:
 
 	// Listen
 	bool	Listen();
-	SOCKET	Accept(SocketAddrIn& target);
+	SOCKET	Accept(Endpoint& target);
 };
