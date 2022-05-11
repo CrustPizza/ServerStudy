@@ -3,7 +3,7 @@
 *	Socket Interface.cpp	*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/10	*
+*	Updated : 2022/05/11	*
 *****************************/
 
 #include "SocketInterface.h"
@@ -11,7 +11,7 @@
 
 SocketInterface::SocketInterface()
 {
-	hSocket = INVALID_SOCKET;
+	fileDescriptor = INVALID_SOCKET;
 	ZeroMemory(&localAddr, sizeof(SOCKADDR_IN));
 }
 
@@ -19,7 +19,7 @@ SocketInterface::~SocketInterface()
 {
 	// 변수가 소멸된다면 소켓을 닫는다.
 	if (IsValid() == true)
-		closesocket(hSocket);
+		closesocket(fileDescriptor);
 }
 
 SocketInterface::SocketInterface(SocketInterface&& other) noexcept
@@ -30,27 +30,27 @@ SocketInterface::SocketInterface(SocketInterface&& other) noexcept
 SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
 {
 	// 이동!
-	hSocket = other.hSocket;
+	fileDescriptor = other.fileDescriptor;
 	localAddr = other.localAddr;
 
 	// 이동된 값 초기화
-	other.hSocket = INVALID_SOCKET;
+	other.fileDescriptor = INVALID_SOCKET;
 	ZeroMemory(&other.localAddr, sizeof(SOCKADDR_IN));
 }
 
 SOCKET SocketInterface::GetSocket()
 {
-	return hSocket;
+	return fileDescriptor;
 }
 
 bool SocketInterface::IsValid()
 {
-	return hSocket != INVALID_SOCKET;
+	return fileDescriptor != INVALID_SOCKET;
 }
 
 void SocketInterface::Attachment(SOCKET socket)
 {
-	hSocket = socket;
+	fileDescriptor = socket;
 }
 
 SOCKET SocketInterface::Detachment()

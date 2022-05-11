@@ -3,7 +3,7 @@
 *	Socket Interface.h		*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/10	*
+*	Updated : 2022/05/11	*
 *****************************/
 
 #pragma once
@@ -39,13 +39,13 @@ public:
 		BYTE sin_zero[8];
 	};
 
-private:
-	SOCKET			hSocket;
+protected:
+	SOCKET			fileDescriptor;
 	SocketAddrIn	localAddr;
 
 public:
 	SocketInterface();
-	~SocketInterface();
+	virtual ~SocketInterface();
 
 	// 이동 생성자를 일단 Detach에서 사용해보기 위해서 만듦
 	SocketInterface(SocketInterface&& other) noexcept;
@@ -58,7 +58,7 @@ public:
 	// Standard
 	virtual bool	Open() abstract;
 	virtual bool	Bind(SocketAddrIn& target) abstract;
-	virtual bool	connect(SocketAddrIn& target) abstract;
+	virtual bool	Connect(SocketAddrIn& target) abstract;
 
 	virtual void	Close() abstract;
 	virtual void	Shutdown(int option = SD_BOTH) abstract;
