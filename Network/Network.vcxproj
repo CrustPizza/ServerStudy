@@ -139,10 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Endpoint.cpp" />
     <ClCompile Include="SocketInterface.cpp" />
     <ClCompile Include="TCPSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Endpoint.h" />
     <ClInclude Include="SocketInterface.h" />
     <ClInclude Include="TCPSocket.h" />
   </ItemGroup>

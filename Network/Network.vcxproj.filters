@@ -1,11 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="SocketInterface.cpp" />
+    <ClCompile Include="TCPSocket.cpp">
+      <Filter>TCP</Filter>
+    </ClCompile>
+    <ClCompile Include="Endpoint.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TCPSocket.h" />
     <ClInclude Include="SocketInterface.h" />
+    <ClInclude Include="TCPSocket.h">
+      <Filter>TCP</Filter>
+    </ClInclude>
+    <ClInclude Include="Endpoint.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="TCP">
+      <UniqueIdentifier>{fff4b797-8664-4941-b32c-0bb3e8e831ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UDP">
+      <UniqueIdentifier>{ab8c9d1a-825e-4540-a736-36cfcc2126e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Endpoint">
+      <UniqueIdentifier>{3366f936-bb21-4dda-a85d-4955e2db5ed9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

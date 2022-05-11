@@ -12,14 +12,12 @@
 SocketInterface::SocketInterface()
 {
 	fileDescriptor = INVALID_SOCKET;
-	ZeroMemory(&localAddr, sizeof(SOCKADDR_IN));
 }
 
 SocketInterface::~SocketInterface()
 {
 	// 변수가 소멸된다면 소켓을 닫는다.
-	if (IsValid() == true)
-		closesocket(fileDescriptor);
+	Close();
 }
 
 SocketInterface::SocketInterface(SocketInterface&& other) noexcept
@@ -35,7 +33,7 @@ SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
 
 	// 이동된 값 초기화
 	other.fileDescriptor = INVALID_SOCKET;
-	ZeroMemory(&other.localAddr, sizeof(SOCKADDR_IN));
+	ZeroMemory(&other.localAddr, sizeof(Endpoint));
 }
 
 SOCKET SocketInterface::GetSocket()
