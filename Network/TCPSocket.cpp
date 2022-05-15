@@ -3,10 +3,12 @@
 *	TCP Socket.cpp			*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/11	*
+*	Updated : 2022/05/15	*
 *****************************/
 
 #include "TCPSocket.h"
+
+#define CLIENT_MAX 10000
 
 TCPSocket::TCPSocket()
 {
@@ -15,7 +17,8 @@ TCPSocket::TCPSocket()
 
 TCPSocket::~TCPSocket()
 {
-
+    // 변수가 소멸된다면 소켓을 닫는다.
+    Close();
 }
 
 bool TCPSocket::Open()
@@ -103,10 +106,15 @@ int TCPSocket::Send(char* buffer, int size, int& error)
 
 bool TCPSocket::Listen()
 {
-    return false;
+    if (listen(fileDescriptor, CLIENT_MAX) == SOCKET_ERROR)
+        return false;
+
+    return true;
 }
 
 SOCKET TCPSocket::Accept(Endpoint& target)
 {
-    return SOCKET();
+    int addressLength = sizeof(target.ipv4EndPoint);
+
+    return accept(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target.ipv4EndPoint), &addressLength);
 }

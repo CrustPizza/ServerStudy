@@ -16,8 +16,7 @@ SocketInterface::SocketInterface()
 
 SocketInterface::~SocketInterface()
 {
-	// 변수가 소멸된다면 소켓을 닫는다.
-	Close();
+
 }
 
 SocketInterface::SocketInterface(SocketInterface&& other) noexcept
@@ -34,6 +33,8 @@ SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
 	// 이동된 값 초기화
 	other.fileDescriptor = INVALID_SOCKET;
 	ZeroMemory(&other.localAddr, sizeof(Endpoint));
+
+	return *this;
 }
 
 SOCKET SocketInterface::GetSocket()
