@@ -4,28 +4,28 @@
     <LocalDebuggerCommandArguments>192.168.11.5 5252</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\Output\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>$(SolutionDir)\Output\</LocalDebuggerEnvironment>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)Output\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>$(SolutionDir)Output\</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>192.168.11.5 5252</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\Output\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>$(SolutionDir)\Output\</LocalDebuggerEnvironment>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)Output\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>$(SolutionDir)Output\</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>192.168.11.5 5252</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\Output\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>$(SolutionDir)\Output\</LocalDebuggerEnvironment>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)Output\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>$(SolutionDir)Output\</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>192.168.11.5 5252</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\Output\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerEnvironment>$(SolutionDir)\Output\</LocalDebuggerEnvironment>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)Output\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>$(SolutionDir)Output\</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>

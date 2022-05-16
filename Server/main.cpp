@@ -11,9 +11,6 @@
 
 #pragma comment(lib, "../Output/Network.lib")
 
-
-#include <iostream>
-
 int main(int argCount, char* argVector[])
 {
 	// Path, IP, Port
@@ -26,11 +23,7 @@ int main(int argCount, char* argVector[])
 
 	Server server(Endpoint(IPAddress.c_str(), port));
 
-	while (true)
-	{
-		if (server.Listen())
-			std::cout << "New Client!" << std::endl;
-	}
+	server.EventLoop();
 
 	return 0;
 }
