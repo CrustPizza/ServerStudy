@@ -1,0 +1,5 @@
+RunAll.bat 명령인수->(IP, Port, Client Count)
+
+RunServer.bat 명령인수->(IP, Port)
+
+RunClient.bat 명령인수->(IP, Port)
