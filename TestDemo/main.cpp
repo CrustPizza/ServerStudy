@@ -9,7 +9,7 @@
 #include <iostream>
 #include "../StreamQueue/StreamQueue.h"
 
-#pragma comment(lib, "../Debug/StreamQueue.lib")
+#pragma comment(lib, "../Output/StreamQueue.lib")
 
 int main()
 {
