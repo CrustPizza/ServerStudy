@@ -6,33 +6,51 @@
 *	Updated : 2022/05/16	*
 *****************************/
 
-#include "Client.h"
+#include "stdafx.h"
 #include <string>
+#include <thread>
 
 #pragma comment(lib, "../Output/Network.lib")
 
-#include <iostream>
-
 int main(int argCount, const char* argVector[])
 {
-	// Path, IP, Port
+	// Path, IP, Port == 3
 	if (argCount != 3)
 		return -1;
 
+	// Game Process
+	std::thread* gameThread = new std::thread([]()
+		{
+			GAMEPROCESS->Run();
+		});
+
+	// IP / Port
 	std::string IPAddress = argVector[1];
 
 	WORD port = std::stoi(argVector[2]);
 
-	Client client;
+	// Client Socket
+	std::thread* clientThread = new std::thread([&IPAddress, &port]()
+		{
+			if (CLIENT->Connect(Endpoint(IPAddress.c_str(), port)) == true)
+			{
+				std::cout << "Connect Success" << std::endl;
 
-	if (client.Connect(Endpoint(argVector[1], port)) == true)
-	{
-		std::cout << "Connect Success" << std::endl;
+				CLIENT->EventLoop();
+			}
+			else
+			{
+				std::cout << "Connect Fail" << std::endl;
+			}
+		});
 
-		client.EventLoop();
-	}
+	// Thread 대기
+	clientThread->join();
+	gameThread->join();
 
-	std::cout << "Connect Fail" << std::endl;
+	// Thread 해제
+	delete clientThread;
+	delete gameThread;
 
 	return 0;
 }

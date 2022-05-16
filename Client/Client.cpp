@@ -6,9 +6,9 @@
 *	Updated : 2022/05/16	*
 *****************************/
 
-#include "Client.h"
+#include "stdafx.h"
 
-#include <iostream>
+Client Client::clientInstance;
 
 Client::Client()
 	: eventHandle(nullptr)
@@ -31,6 +31,11 @@ Client::~Client()
 		Disconnect();
 
 	WSACleanup();
+}
+
+Client* Client::GetInstance()
+{
+	return &clientInstance;
 }
 
 bool Client::Connect(Endpoint& target)
@@ -76,33 +81,65 @@ void Client::EventLoop()
 		if (index == WSA_WAIT_TIMEOUT)
 			continue;
 
-		WSAEnumNetworkEvents(clientSocket->GetSocket(), &eventHandle, &netEvent);
+		WSAEnumNetworkEvents(clientSocket->GetSocket(), eventHandle, &netEvent);
 
 		switch (netEvent.lNetworkEvents)
 		{
 
 		case FD_READ:
 		{
+			clientSocket->Recv();
 
 			break;
 		}
 
 		case FD_WRITE:
 		{
+			clientSocket->Send();
 
 			break;
 		}
 
 		case FD_CLOSE:
 		{
-			Disconnect();
-			isLaunch = false;
-
 			std::cout << "Disconnected" << std::endl;
+			isLaunch = false;
+			GAMEPROCESS->Stop();
 
 			break;
 		}
 
 		}
 	}
+}
+
+bool Client::Send(const char* data, UINT size)
+{
+	if (size <= 0)
+		return false; // 예외 처리
+
+	// 2Byte를 Packet Size에 할당
+	std::string str = "  ";
+
+	for (int i = 0; i < 2; i++)
+		str[1 - i] = (size >> (i * 8)) & 0xff;
+
+	str += data;
+
+	return clientSocket->SendStream(str.c_str(), size + 2);
+}
+
+bool Client::Recv(char* data, UINT size)
+{
+	if (size < 2)
+		return false; // 예외 처리
+
+	// Packet Size 확인을 위해 2Byte 읽어오기
+	if (clientSocket->RecvStream(data, 2) != true)
+		return false; // 예외 처리
+
+	// Packet Size 계산
+	UINT packetSize = (data[0] << 8) + data[1];
+
+	return clientSocket->RecvStream(data, packetSize);
 }
