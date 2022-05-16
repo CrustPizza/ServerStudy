@@ -8,7 +8,7 @@
 
 -----------
 
-![Diagram][./img/Diagram.png]
+![Diagram](./img/Diagram.png)
 
 ---------------
 
