@@ -11,6 +11,8 @@
 #define CLIENT_MAX 10000
 
 TCPSocket::TCPSocket()
+    : sendQueue(nullptr)
+    , recvQueue(nullptr)
 {
 
 }
@@ -96,12 +98,26 @@ void TCPSocket::Shutdown(int option)
     shutdown(fileDescriptor, option);
 }
 
-int TCPSocket::Recv(char* buffer, int size, int& error)
+int TCPSocket::Recv()
 {
+    int remainSize = recvBuffer.size - recvBuffer.count;
+
+    if (remainSize <= 0)
+        return remainSize; // 抗寇 贸府
+
+    DWORD recvSize = recv(fileDescriptor, recvBuffer.buffer, remainSize, 0);
+
+    if (recvSize <= 0)
+        return recvSize; // 抗寇 贸府
+
+    recvBuffer.count += recvSize;
+
+
+
     return 0;
 }
 
-int TCPSocket::Send(char* buffer, int size, int& error)
+int TCPSocket::Send()
 {
     return 0;
 }

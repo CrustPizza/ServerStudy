@@ -3,7 +3,7 @@
 *	Socket Interface.h		*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/11	*
+*	Updated : 2022/05/16	*
 *****************************/
 
 #pragma once
