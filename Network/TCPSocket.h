@@ -11,7 +11,6 @@
 
 class TCPSocket : public SocketInterface
 {
-
 public:
 	TCPSocket();
 	~TCPSocket() override;

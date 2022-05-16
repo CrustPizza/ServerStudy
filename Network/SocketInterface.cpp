@@ -28,11 +28,11 @@ SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
 {
 	// 이동!
 	fileDescriptor = other.fileDescriptor;
-	localAddr = other.localAddr;
+	address = other.address;
 
 	// 이동된 값 초기화
 	other.fileDescriptor = INVALID_SOCKET;
-	ZeroMemory(&other.localAddr, sizeof(Endpoint));
+	ZeroMemory(&other.address, sizeof(Endpoint));
 
 	return *this;
 }
@@ -40,6 +40,11 @@ SocketInterface& SocketInterface::operator=(SocketInterface&& other) noexcept
 SOCKET SocketInterface::GetSocket()
 {
 	return fileDescriptor;
+}
+
+Endpoint& SocketInterface::GetEndpoint()
+{
+	return address;
 }
 
 bool SocketInterface::IsValid()

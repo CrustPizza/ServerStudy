@@ -16,7 +16,7 @@ class SocketInterface
 {
 protected:
 	SOCKET		fileDescriptor;
-	Endpoint	localAddr;
+	Endpoint	address;
 
 public:
 	SocketInterface();
@@ -40,6 +40,7 @@ public:
 
 	// Socket control
 	SOCKET			GetSocket();
+	Endpoint&		GetEndpoint();
 	bool			IsValid();
 
 	void			Attachment(SOCKET socket);

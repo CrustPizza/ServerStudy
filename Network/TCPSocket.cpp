@@ -3,7 +3,7 @@
 *	TCP Socket.cpp			*
 *							*
 *	Created : 2022/05/09	*
-*	Updated : 2022/05/15	*
+*	Updated : 2022/05/16	*
 *****************************/
 
 #include "TCPSocket.h"
@@ -53,7 +53,7 @@ bool TCPSocket::Bind(Endpoint& target)
         return false;
     }
 
-    localAddr = localAddr;
+    address = target;
 
     return true;
 }
@@ -73,6 +73,8 @@ bool TCPSocket::Connect(Endpoint& target)
 
         return false;
     }
+
+    address = target;
 
     return true;
 }
@@ -116,5 +118,7 @@ SOCKET TCPSocket::Accept(Endpoint& target)
 {
     int addressLength = sizeof(target.ipv4EndPoint);
 
-    return accept(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target.ipv4EndPoint), &addressLength);
+    SOCKET newClient = accept(fileDescriptor, reinterpret_cast<SOCKADDR*>(&target.ipv4EndPoint), &addressLength);
+
+    return newClient;
 }
