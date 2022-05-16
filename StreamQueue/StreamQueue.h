@@ -3,7 +3,7 @@
 *	Stream Queue.h			*
 *							*
 *	Created : 2022/05/03	*
-*	Updated : 2022/05/07	*
+*	Updated : 2022/05/16	*
 *****************************/
 
 #pragma once
@@ -37,7 +37,7 @@ public:
 
 	// 문자열은 따로 overloading 해야된다. 
 	bool Write(std::string& data);
-	bool Write(const char* data, UINT length);
+	bool Write(const char* data, UINT size);
 
 	// Size만큼 값을 읽어서 T로 변환 후 반환
 	template <typename T>
@@ -45,6 +45,7 @@ public:
 
 	// 문자열로 원하는 만큼만 읽어오기
 	const char* Read(UINT size);
+	void Read(char* data, UINT size);
 
 	// 문자열로 전부 다 읽어온다.
 	const char* ReadAll();
@@ -63,6 +64,7 @@ public:
 
 	// 스트림의 상태를 확인하기 위한 함수들
 	UINT GetDataSize();
+	UINT GetRemainSize();
 	bool Full();
 	bool Empty();
 	void Clear();
@@ -210,6 +212,26 @@ inline const char* StreamQueue<BufferSize>::Read(UINT size)
 }
 
 template<UINT BufferSize>
+inline void StreamQueue<BufferSize>::Read(char* data, UINT size)
+{
+	if (ReadBufferCheck(size) != true)
+		; // Error
+
+	// 
+	for (int i = 0; i < size; i++)
+	{
+		data[i] = buffer[headIndex++];
+	}
+
+	// 읽었을 때 Head와 Tail이 같은 위치라면
+	// 모든 데이터를 가져온 것이므로 0으로 초기화 시켜준다.
+	if (tailIndex == headIndex)
+	{
+		Clear();
+	}
+}
+
+template<UINT BufferSize>
 inline const char* StreamQueue<BufferSize>::ReadAll()
 {
 	return Read(GetDataSize());
@@ -274,6 +296,12 @@ inline UINT StreamQueue<BufferSize>::GetDataSize()
 {
 	// 현재 저장중인 데이터의 크기
 	return tailIndex - headIndex;
+}
+
+template<UINT BufferSize>
+inline UINT StreamQueue<BufferSize>::GetRemainSize()
+{
+	return BufferSize - GetDataSize();
 }
 
 template<UINT BufferSize>
