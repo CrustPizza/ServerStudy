@@ -12,10 +12,8 @@ class Player;
 
 class GameProcess
 {
-	Player* player;
-
 	static GameProcess gameInstance;
-
+	Player* player;
 	bool isLaunch;
 
 private:

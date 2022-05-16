@@ -11,11 +11,10 @@
 
 class Client
 {
+	static Client clientInstance;
 	TCPSocket*	clientSocket;
 	WSAEVENT	eventHandle;
 	bool		isLaunch;
-
-	static Client clientInstance;
 
 private:
 	Client();
