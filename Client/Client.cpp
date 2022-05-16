@@ -26,7 +26,7 @@ Client::~Client()
 	WSACleanup();
 
 	if (clientSocket != nullptr)
-		delete clientSocket;
+		Disconnect();
 }
 
 bool Client::Connect(Endpoint& target)
@@ -42,4 +42,6 @@ bool Client::Connect(Endpoint&& target)
 void Client::Disconnect()
 {
 	clientSocket->Close();
+	delete clientSocket;
+	clientSocket = nullptr;
 }
