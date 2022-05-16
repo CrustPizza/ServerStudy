@@ -10,4 +10,9 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Player">
+      <UniqueIdentifier>{61016e82-7141-48d2-96ae-2f91ce0b0bf7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
 </Project>

@@ -129,7 +129,7 @@ void Server::Close(int index)
 void Server::Release()
 {
 	// Socket Clear
-	for (int i = 0; i < socketList.size(); i++)
+	for (int i = socketList.size() - 1; i >= 0; i--)
 	{
 		if (socketList[i] != nullptr)
 		{
@@ -153,14 +153,6 @@ void Server::EventLoop()
 
 	while (isLaunch)
 	{
-		if (_kbhit() != 0)
-		{
-			char input = _getch();
-
-			if (input == 'Q' || input == 'q')
-				break;
-		}
-
 		int index = WSAWaitForMultipleEvents(eventList.size(), eventList.data(), false, 10, false);
 
 		if (index == WSA_WAIT_TIMEOUT)
@@ -184,12 +176,25 @@ void Server::EventLoop()
 
 		case FD_READ:
 		{
+			int recvSize = socketList[index]->Recv();
+
+			std::cout << "Receive Message" << std::endl;
+
+			char buffer[1024] = {};
+			socketList[index]->RecvStream(buffer, recvSize);
+
+			std::cout << "Echo : " << &buffer[2] << std::endl;
+
+			socketList[index]->SendStream(buffer, recvSize);
 
 			break;
 		}
 
 		case FD_WRITE:
 		{
+			socketList[index]->Send();
+
+			std::cout << "Send Message" << std::endl;
 
 			break;
 		}
