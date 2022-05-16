@@ -14,11 +14,18 @@ TCPSocket::TCPSocket()
     : sendQueue(nullptr)
     , recvQueue(nullptr)
 {
-
+    sendQueue = new StreamQueue<4096>;
+    recvQueue = new StreamQueue<4096>;
 }
 
 TCPSocket::~TCPSocket()
 {
+    if (sendQueue != nullptr)
+        delete sendQueue;
+
+    if (recvQueue != nullptr)
+        delete recvQueue;
+
     // 변수가 소멸된다면 소켓을 닫는다.
     Close();
 }
@@ -98,28 +105,117 @@ void TCPSocket::Shutdown(int option)
     shutdown(fileDescriptor, option);
 }
 
+int TCPSocket::Send()
+{
+	// SendBuffer의 남은 저장 공간
+	int remainSize = sendBuffer.size - sendBuffer.count;
+
+    int dataSize = 0;
+
+	{
+        std::lock_guard<recursive_mutex> lock(sendMutex);
+
+		// Queue에서 보낼 데이터의 크기
+		dataSize = sendQueue->GetDataSize() <= remainSize ? sendQueue->GetDataSize() : remainSize;
+
+		// Buffer에 데이터 저장
+		if (dataSize > 0)
+		{
+			sendQueue->Read(sendBuffer.buffer, dataSize);
+			sendBuffer.count += dataSize;
+		}
+    }
+
+	// Buffer에 저장된 데이터 크기 구하기
+	dataSize = sendBuffer.count - sendBuffer.done;
+
+	// SocketBuffer에 데이터를 보낸다.
+	DWORD sendSize = send(fileDescriptor, &sendBuffer.buffer[sendBuffer.done], dataSize, 0);
+
+	if (sendSize <= 0)
+		return sendSize; // 예외 처리
+
+	// 전송 크기를 비교해서 Buffer가 비워졌다면 초기화한다.
+	if (sendBuffer.done + sendSize == sendBuffer.count)
+	{
+		sendBuffer.done = 0;
+		sendBuffer.count = 0;
+	}
+	else
+	{
+		sendBuffer.done += sendSize;
+	}
+
+	return sendSize;
+}
+
 int TCPSocket::Recv()
 {
+    // RecvBuffer의 남은 저장 공간
     int remainSize = recvBuffer.size - recvBuffer.count;
 
-    if (remainSize <= 0)
+    if (remainSize < 0)
         return remainSize; // 예외 처리
 
-    DWORD recvSize = recv(fileDescriptor, recvBuffer.buffer, remainSize, 0);
+    // SocketBuffer에서 데이터를 읽어오고 읽은 크기를 반환 받는다.
+    DWORD recvSize = recv(fileDescriptor, &recvBuffer.buffer[recvBuffer.count], remainSize, 0);
 
     if (recvSize <= 0)
         return recvSize; // 예외 처리
-
+    
+    // 반환 크기를 저장한다.
     recvBuffer.count += recvSize;
 
+    // 저장된 데이터 크기를 구한다.
+    int dataSize = recvBuffer.count - recvBuffer.done;
 
+	{
+        std::lock_guard<recursive_mutex> lock(recvMutex);
 
-    return 0;
+		// Recv Stream Queue의 남은 저장 공간을 확인해서 저장할 데이터 공간을 작은 수로 맞춘다.
+		dataSize = recvQueue->GetRemainSize() < dataSize ? recvQueue->GetRemainSize() : dataSize;
+
+		// Stream Queue에 저장
+		recvQueue->Write(&recvBuffer.buffer[recvBuffer.done], dataSize);
+    }
+
+    //  저장 크기를 비교해서 Buffer가 비워졌다면 초기화한다.
+    if (recvBuffer.done + dataSize == recvBuffer.count)
+    {
+        recvBuffer.done = 0;
+        recvBuffer.count = 0;
+    }
+    else
+    {
+        recvBuffer.done += dataSize;
+    }
+
+    return recvSize;
 }
 
-int TCPSocket::Send()
+bool TCPSocket::SendStream(const char* data, UINT size)
 {
-    return 0;
+    std::lock_guard<recursive_mutex> lock(sendMutex);
+
+    if (sendQueue->GetRemainSize() < size)
+        return false; // 예외 처리
+
+    sendQueue->Write(data, size);
+    Send();
+
+	return true;
+}
+
+bool TCPSocket::RecvStream(char* data, UINT size)
+{
+	std::lock_guard<recursive_mutex> lock(recvMutex);
+
+	if (recvQueue->GetDataSize() < size)
+		return false; // 예외 처리
+
+	recvQueue->Read(data, size);
+
+	return true;
 }
 
 bool TCPSocket::Listen()

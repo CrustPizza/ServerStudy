@@ -20,6 +20,13 @@
 
 -----------
 
+**2022. 05. 16**
+
+- TCPSocket
+  + Send/Recv Buffer 및 StreamQueue 생성
+  + Send/Recv 함수 구현
+  + Thread Safe하도록 Mutex 적용
+
 **2022. 05. 15**
 
 - TCPSocket

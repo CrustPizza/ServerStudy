@@ -9,12 +9,16 @@
 #pragma once
 #include "SocketInterface.h"
 #include "../StreamQueue/StreamQueue.h"
+#include <mutex>
 
 #pragma comment(lib, "../Output/StreamQueue.lib")
 
+using std::recursive_mutex;
+
 class TCPSocket : public SocketInterface
 {
-	template<UINT bufferSize = 1024>
+	// Stream Queue와 Socket Buffer 사이의 징검다리 역할
+	template<UINT BufferSize = 1024>
 	struct TCPBuffer
 	{
 		WORD count;
@@ -22,9 +26,9 @@ class TCPSocket : public SocketInterface
 		WORD size;
 		char* buffer;
 
-		TCPBuffer() : count(0), done(0), size(bufferSize), buffer(nullptr)
+		TCPBuffer() : count(0), done(0), size(BufferSize), buffer(nullptr)
 		{
-			buffer = new char[bufferSize];
+			buffer = new char[BufferSize];
 		}
 		~TCPBuffer()
 		{
@@ -34,11 +38,15 @@ class TCPSocket : public SocketInterface
 	};
 
 private:
-	TCPBuffer<1024> sendBuffer;
-	TCPBuffer<1024> recvBuffer;
+	// Send
+	TCPBuffer<1024>		sendBuffer;
+	StreamQueue<4096>*	sendQueue;
+	recursive_mutex		sendMutex;
 
-	StreamQueue<4096>* sendQueue;
-	StreamQueue<4096>* recvQueue;
+	// Receive
+	TCPBuffer<1024>		recvBuffer;
+	StreamQueue<4096>*	recvQueue;
+	recursive_mutex		recvMutex;
 
 public:
 	TCPSocket();
@@ -53,8 +61,10 @@ public:
 	void	Shutdown(int option = SD_BOTH) override;
 
 	// Input / Output
-	int		Recv();
 	int		Send();
+	int		Recv();
+	bool	SendStream(const char* data, UINT size);
+	bool	RecvStream(char* data, UINT size);
 
 	// Listen
 	bool	Listen();
