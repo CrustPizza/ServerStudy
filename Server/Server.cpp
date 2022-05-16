@@ -7,6 +7,7 @@
 *****************************/
 
 #include "Server.h"
+#include <conio.h>
 
 #include <iostream>
 
@@ -85,7 +86,6 @@ bool Server::Listen()
 	if (socketList[0]->Listen() != true)
 		return false; // 예외 처리
 
-
 	return true;
 }
 
@@ -153,7 +153,15 @@ void Server::EventLoop()
 
 	while (isLaunch)
 	{
-		int index = WSAWaitForMultipleEvents(eventList.size(), eventList.data(), false, 100, false);
+		if (_kbhit() != 0)
+		{
+			char input = _getch();
+
+			if (input == 'Q' || input == 'q')
+				break;
+		}
+
+		int index = WSAWaitForMultipleEvents(eventList.size(), eventList.data(), false, 10, false);
 
 		if (index == WSA_WAIT_TIMEOUT)
 			continue;
