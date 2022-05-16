@@ -3,7 +3,7 @@
 *	main.cpp				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/15	*
+*	Updated : 2022/05/16	*
 *****************************/
 
 #include "Client.h"
@@ -25,15 +25,14 @@ int main(int argCount, const char* argVector[])
 
 	Client client;
 
-	Sleep(3000);
-
-	if (client.Connect(Endpoint(argVector[1], port)) != true)
-		std::cout << "Connect Fail" << std::endl;
-	else
+	if (client.Connect(Endpoint(argVector[1], port)) == true)
+	{
 		std::cout << "Connect Success" << std::endl;
 
-	while (true)
-		;
+		client.EventLoop();
+	}
+
+	std::cout << "Connect Fail" << std::endl;
 
 	return 0;
 }

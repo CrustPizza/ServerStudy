@@ -3,7 +3,7 @@
 *	Client.h				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/15	*
+*	Updated : 2022/05/16	*
 *****************************/
 
 #pragma once
@@ -11,7 +11,9 @@
 
 class Client
 {
-	TCPSocket* clientSocket;
+	TCPSocket*	clientSocket;
+	WSAEVENT	eventHandle;
+	bool		isLaunch;
 
 public:
 	Client();
@@ -20,4 +22,5 @@ public:
 	bool Connect(Endpoint& target);
 	bool Connect(Endpoint&& target);
 	void Disconnect();
+	void EventLoop();
 };
