@@ -8,6 +8,20 @@
 
 -----------
 
+**2022. 05. 22**
+
+- GameProcess
+  + Remote Player 추가, Packet 전송 옵션 관련 테스트 기능 추가
+
+- Client
+  + Server와 송/수신하는 주체, PlayerManager의 작업 Queue에 전달
+
+- PlayerManager
+  + Client로부터 작업을 전달받고 Player에 전달 구현
+
+- Player
+  + Packet을 분석해서 처리하는 기능 추가
+
 **2022. 05. 16**
 
 - main

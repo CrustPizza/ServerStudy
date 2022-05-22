@@ -16,6 +16,12 @@
 
 -----------
 
+**2022. 05. 22**
+
+- Network Protocol 추가
+- Client Refactoring, 기능 추가 및 개선
+- Server Refactoring, 기능 추가 및 개선
+
 **2022. 05. 16**
 
 - Network 기본 구현 작업 #4

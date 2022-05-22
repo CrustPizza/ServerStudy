@@ -9,6 +9,24 @@
 
 -----------
 
+**2022. 05. 22**
+
+- Server
+  + Server에서 Client 관리하는 ClientManager를 따로 분리
+  + Server에서 클라이언트의 연결 요청만 처리하고, ClientManager로 인계
+
+- ClientManager
+  + Server에 접속중인 Client들의 관리, 송/수신 요청 처리
+  + 각 Client에 Unique한 Network ID 부여
+  + 송/수신, 연결 해제 요청이 들어왔을 때 PlayerManager의 작업 Queue에 등록
+
+- PlayerManager
+  + 연결된 Player들의 목록을 저장하고, 송/수신이 될 때 각 Player에 작업 전달
+
+- Player
+  + Player의 Network ID, 상태 등을 저장하고 관리할 클래스
+  + 송/수신 패킷 관리, 연결 해제 됐을 때 필요한 작업 처리
+
 **2022. 05. 16**
 
 - Server

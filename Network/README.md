@@ -20,6 +20,12 @@
 
 -----------
 
+**2022. 05. 22**
+
+- Protocol
+  + 현재 Project에서 사용할 통신 Protocol 목록
+  + 일단 Print, Echo, Broadcast만 등록
+
 **2022. 05. 16**
 
 - TCPSocket
