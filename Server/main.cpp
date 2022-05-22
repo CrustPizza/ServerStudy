@@ -7,6 +7,8 @@
 *****************************/
 
 #include "Server.h"
+#include "ClientManager.h"
+#include "PlayerManager.h"
 #include <string>
 
 #pragma comment(lib, "../Output/Network.lib")
@@ -22,8 +24,17 @@ int main(int argCount, char* argVector[])
 	WORD port = std::stoi(argVector[2]);
 
 	Server server(Endpoint(IPAddress.c_str(), port));
+	ClientManager clientManager;
+	PlayerManager playerManager;
+	server.SetClientManager(&clientManager);
+	clientManager.SetPlayerManager(&playerManager);
+	playerManager.SetClientManager(&clientManager);
 
-	server.EventLoop();
+	while (true)
+	{
+		server.Update();
+		clientManager.Update();
+	}
 
 	return 0;
 }

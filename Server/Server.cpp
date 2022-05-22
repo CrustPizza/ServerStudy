@@ -3,16 +3,16 @@
 *	Server.cpp				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #include "Server.h"
-#include <conio.h>
-
 #include <iostream>
 
 Server::Server(Endpoint& target)
-	: isLaunch(true)
+	: clientManager(nullptr)
+	, listenSocket(nullptr)
+	, listenEvent(nullptr)
 {
 	WSADATA w;
 
@@ -24,7 +24,9 @@ Server::Server(Endpoint& target)
 }
 
 Server::Server(Endpoint&& target)
-	: isLaunch(true)
+	: clientManager(nullptr)
+	, listenSocket(nullptr)
+	, listenEvent(nullptr)
 {
 	WSADATA w;
 
@@ -43,7 +45,7 @@ Server::~Server()
 
 bool Server::CreateListen(Endpoint& target)
 {
-	TCPSocket* listenSocket = new TCPSocket;
+	listenSocket = new TCPSocket;
 
 	if (listenSocket->Open() != true)
 		return false; // 예외 처리
@@ -51,19 +53,19 @@ bool Server::CreateListen(Endpoint& target)
 	if (listenSocket->Bind(target) != true)
 		return false; // 예외 처리
 
-	WSAEVENT eventHandle = WSACreateEvent();
+	listenEvent = WSACreateEvent();
 
-	WSAEventSelect(listenSocket->GetSocket(), eventHandle, FD_ACCEPT | FD_CLOSE);
+	WSAEventSelect(listenSocket->GetSocket(), listenEvent, FD_ACCEPT | FD_CLOSE);
 
-	socketList.push_back(listenSocket);
-	eventList.push_back(eventHandle);
+	if (Listen() != true)
+		; // 예외 처리
 
 	return true;
 }
 
 bool Server::CreateListen(Endpoint&& target)
 {
-	TCPSocket* listenSocket = new TCPSocket;
+	listenSocket = new TCPSocket;
 
 	if (listenSocket->Open() != true)
 		return false; // 예외 처리
@@ -71,20 +73,22 @@ bool Server::CreateListen(Endpoint&& target)
 	if (listenSocket->Bind(target) != true)
 		return false; // 예외 처리
 
-	WSAEVENT eventHandle = WSACreateEvent();
+	listenEvent = WSACreateEvent();
 
-	WSAEventSelect(listenSocket->GetSocket(), eventHandle, FD_ACCEPT | FD_CLOSE);
+	WSAEventSelect(listenSocket->GetSocket(), listenEvent, FD_ACCEPT | FD_CLOSE);
 
-	socketList.push_back(listenSocket);
-	eventList.push_back(eventHandle);
+	if (Listen() != true)
+		; // 예외 처리
 
 	return true;
 }
 
 bool Server::Listen()
 {
-	if (socketList[0]->Listen() != true)
+	if (listenSocket->Listen() != true)
 		return false; // 예외 처리
+
+	std::cout << "Listen.." << std::endl;
 
 	return true;
 }
@@ -92,130 +96,58 @@ bool Server::Listen()
 bool Server::Accept()
 {
 	TCPSocket* newClient = new TCPSocket;
-	SOCKET clientSocket = socketList[0]->Accept(newClient->GetEndpoint());
+	SOCKET clientSocket = listenSocket->Accept(newClient->GetEndpoint());
 
 	if (clientSocket == INVALID_SOCKET)
 		return false; // 예외 처리
 
-	WSAEVENT eventHandle = WSACreateEvent();
-
 	newClient->Attachment(clientSocket);
 
-	WSAEventSelect(newClient->GetSocket(), eventHandle, FD_READ | FD_WRITE | FD_CLOSE);
-
-	socketList.push_back(newClient);
-	eventList.push_back(eventHandle);
+	if (clientManager->AddNewClient(newClient) != true)
+		return false; // 예외 처리
 
 	return true;
 }
 
-void Server::Close(int index)
-{
-	if (index >= socketList.size())
-		return;
-
-	// 해제
-	socketList[index]->Close();
-	WSACloseEvent(eventList[index]);
-	delete socketList[index];
-
-	// 지워진 자리를 맨 뒤의 소켓을 옮겨 넣는다.
-	socketList[index] = socketList.back();
-	eventList[index] = eventList.back();
-	socketList.pop_back();
-	eventList.pop_back();
-}
-
 void Server::Release()
 {
-	// Socket Clear
-	for (int i = socketList.size() - 1; i >= 0; i--)
+	if (listenSocket != nullptr)
 	{
-		if (socketList[i] != nullptr)
-		{
-			socketList[i]->Close();
-			WSACloseEvent(eventList[i]);
-			delete socketList[i];
-		}
+		listenSocket->Close();
+		WSACloseEvent(listenEvent);
+		delete listenSocket;
 	}
-
-	socketList.clear();
 }
 
-void Server::EventLoop()
+void Server::Update()
 {
 	WSANETWORKEVENTS netEvent;
 
-	if (Listen() != true)
-		; // 예외 처리
+	DWORD index = WaitForSingleObjectEx(listenEvent, 10, false);
 
-	std::cout << "Listen.." << std::endl;
+	if (index == WSA_WAIT_TIMEOUT)
+		return;
 
-	while (isLaunch)
+	WSAEnumNetworkEvents(listenSocket->GetSocket(), listenEvent, &netEvent);
+
+	switch (netEvent.lNetworkEvents)
 	{
-		int index = WSAWaitForMultipleEvents(eventList.size(), eventList.data(), false, 10, false);
 
-		if (index == WSA_WAIT_TIMEOUT)
-			continue;
-
-		WSAEnumNetworkEvents(socketList[index]->GetSocket(), eventList[index], &netEvent);
-
-		switch (netEvent.lNetworkEvents)
+	case FD_ACCEPT:
+	{
+		if (Accept() == true)
 		{
-
-		case FD_ACCEPT:
-		{
-			if (Accept() == true)
-			{
-				std::cout << "New Client!" << std::endl;
-				std::cout << "Total Clients : " << GetClientCount() << std::endl;
-			}
-
-			break;
+			std::cout << "New Client!" << std::endl;
+			std::cout << "Total Clients : " << clientManager->GetClientCount() << std::endl;
 		}
 
-		case FD_READ:
-		{
-			int recvSize = socketList[index]->Recv();
-
-			std::cout << "Receive Message" << std::endl;
-
-			char buffer[1024] = {};
-			socketList[index]->RecvStream(buffer, recvSize);
-
-			std::cout << "Echo : " << &buffer[2] << std::endl;
-
-			socketList[index]->SendStream(buffer, recvSize);
-
-			break;
-		}
-
-		case FD_WRITE:
-		{
-			socketList[index]->Send();
-
-			std::cout << "Send Message" << std::endl;
-
-			break;
-		}
-
-		case FD_CLOSE:
-		{
-			Close(index);
-
-			std::cout << "Client Leave" << std::endl;
-			std::cout << "Total Clients : " << GetClientCount() << std::endl;
-
-			break;
-		}
-
-		}
+		break;
 	}
 
-	Release();
+	}
 }
 
-int Server::GetClientCount()
+void Server::SetClientManager(ClientManager* clientManager)
 {
-	return socketList.size() - 1;
+	this->clientManager = clientManager;
 }

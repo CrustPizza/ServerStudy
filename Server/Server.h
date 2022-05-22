@@ -3,20 +3,18 @@
 *	Server.h				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #pragma once
-#include "../Network/TCPSocket.h"
-#include <vector>
+#include "ClientManager.h"
 
 class Server
 {
-	// 0¹øÀº Listen
-	std::vector<TCPSocket*>	socketList;
-	std::vector<WSAEVENT>	eventList;
+	ClientManager* clientManager;
 
-	bool isLaunch;
+	TCPSocket*	listenSocket;
+	WSAEVENT	listenEvent;
 
 public:
 	Server(Endpoint& target);
@@ -27,10 +25,9 @@ public:
 	bool CreateListen(Endpoint&& target);
 	bool Listen();
 	bool Accept();
-	void Close(int index);
 	void Release();
 
-	void EventLoop();
+	void Update();
 
-	int GetClientCount();
+	void SetClientManager(ClientManager* clientManager);
 };
