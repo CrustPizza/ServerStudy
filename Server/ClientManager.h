@@ -8,6 +8,7 @@
 
 #pragma once
 #include "../Network/TCPSocket.h"
+#include "../Network/Protocol.h"
 #include <vector>
 #include <queue>
 
@@ -47,10 +48,17 @@ public:
 	void Update();
 	void Release();
 
-	void Close(int index);
-
-	bool AddNewClient(TCPSocket* socket);
-	UINT GetClientCount();
+	bool Send(UINT networkID, Protocol protocol, const char* data, UINT size);
+	bool Recv(UINT networkID, char* data, UINT size);
+	bool Broadcast(Protocol protocol, const char* data, UINT size);
+	void Close(UINT networkID);
 
 	void SetPlayerManager(PlayerManager* playerManager);
+
+	bool	AddNewClient(TCPSocket* socket);
+	UINT	GetClientCount();
+
+private:
+	Client* FindClient(UINT networkID);
+	int		FindClientIndex(UINT networkID);
 };

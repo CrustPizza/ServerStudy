@@ -34,6 +34,7 @@ int main(int argCount, char* argVector[])
 	{
 		server.Update();
 		clientManager.Update();
+		playerManager.Update();
 	}
 
 	return 0;

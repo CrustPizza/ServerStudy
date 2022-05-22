@@ -14,6 +14,9 @@
     <ClCompile Include="ClientManager.cpp">
       <Filter>ClientManager</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>PlayerManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Server">
@@ -35,6 +38,9 @@
     </ClInclude>
     <ClInclude Include="ClientManager.h">
       <Filter>ClientManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>PlayerManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
