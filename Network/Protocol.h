@@ -1,3 +1,11 @@
+/****************************
+*							*
+*	Protocol.h				*
+*							*
+*	Created : 2022/05/22	*
+*	Updated : 2022/05/22	*
+*****************************/
+
 #pragma once
 
 enum class Protocol
