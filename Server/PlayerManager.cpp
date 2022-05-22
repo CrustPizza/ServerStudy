@@ -84,6 +84,7 @@ void PlayerManager::SubPlayer(UINT networkID)
 		// 맨 뒤의 원소를 지워질 위치에 덮어 씌운다.
 		if (playerList[i]->networkID == networkID)
 		{
+			delete playerList[i];
 			playerList[i] = playerList.back();
 			playerList.pop_back();
 
