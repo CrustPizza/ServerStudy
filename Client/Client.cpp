@@ -3,7 +3,7 @@
 *	Client.cpp				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #include "stdafx.h"
@@ -11,8 +11,8 @@
 Client Client::clientInstance;
 
 Client::Client()
-	: eventHandle(nullptr)
-	, isLaunch(true)
+	: playerManager(nullptr)
+	, eventHandle(nullptr)
 {
 	WSADATA w;
 
@@ -70,46 +70,43 @@ void Client::Disconnect()
 	clientSocket = nullptr;
 }
 
-void Client::EventLoop()
+void Client::Update()
 {
 	WSANETWORKEVENTS netEvent;
+	DWORD index = WaitForSingleObjectEx(eventHandle, 10, false);
 
-	while (isLaunch)
+	if (index == WSA_WAIT_TIMEOUT)
+		return;
+
+	WSAEnumNetworkEvents(clientSocket->GetSocket(), eventHandle, &netEvent);
+
+	switch (netEvent.lNetworkEvents)
 	{
-		int index = WSAWaitForMultipleEvents(1, &eventHandle, false, 10, false);
 
-		if (index == WSA_WAIT_TIMEOUT)
-			continue;
+	case FD_READ:
+	{
+		clientSocket->Recv();
+		playerManager->ReserveReceive(index);
 
-		WSAEnumNetworkEvents(clientSocket->GetSocket(), eventHandle, &netEvent);
+		break;
+	}
 
-		switch (netEvent.lNetworkEvents)
-		{
+	case FD_WRITE:
+	{
+		clientSocket->Send();
+		playerManager->ReserveSend(index);
 
-		case FD_READ:
-		{
-			clientSocket->Recv();
+		break;
+	}
 
-			break;
-		}
+	case FD_CLOSE:
+	{
+		playerManager->ReserveClose(index);
+		std::cout << "Disconnected" << std::endl;
 
-		case FD_WRITE:
-		{
-			clientSocket->Send();
+		break;
+	}
 
-			break;
-		}
-
-		case FD_CLOSE:
-		{
-			std::cout << "Disconnected" << std::endl;
-			isLaunch = false;
-			GAMEPROCESS->Stop();
-
-			break;
-		}
-
-		}
 	}
 }
 
@@ -149,4 +146,9 @@ bool Client::Recv(char* data, UINT size)
 		return false; // 패킷 사이즈를 다 받아가지 못함
 
 	return clientSocket->RecvStream(data, packetSize);
+}
+
+void Client::SetPlayerManager(PlayerManager* playerManager)
+{
+	this->playerManager = playerManager;
 }

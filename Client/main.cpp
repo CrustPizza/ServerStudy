@@ -3,7 +3,7 @@
 *	main.cpp				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #include "stdafx.h"
@@ -29,14 +29,21 @@ int main(int argCount, const char* argVector[])
 
 	WORD port = std::stoi(argVector[2]);
 
+	PlayerManager playerManager;
+
 	// Client Socket
-	std::thread* clientThread = new std::thread([&IPAddress, &port]()
+	std::thread* clientThread = new std::thread([&IPAddress, &port, &playerManager]()
 		{
 			if (CLIENT->Connect(Endpoint(IPAddress.c_str(), port)) == true)
 			{
 				std::cout << "Connect Success" << std::endl;
+				CLIENT->SetPlayerManager(&playerManager);
 
-				CLIENT->EventLoop();
+				while (true)
+				{
+					CLIENT->Update();
+					playerManager.Update();
+				}
 			}
 			else
 			{

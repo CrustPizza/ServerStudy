@@ -8,7 +8,6 @@
 
 #include "stdafx.h"
 #include "../Network/Protocol.h"
-#include <conio.h>
 
 Player::Player()
 	: time(0)
@@ -29,37 +28,10 @@ void Player::Init()
 
 void Player::Update()
 {
-	//ULONGLONG curr = GetTickCount64();
+	ULONGLONG curr = GetTickCount64();
 
-	//time += curr - prev;
-	//prev = curr;
-
-	//if (time >= 1000)
-	//{
-	//	std::string message = "Hello";
-
-	//	CLIENT->Send(Protocol::ECHO, message.c_str(), message.length());
-	//	time -= 1000;
-	//}
-
-	if (_kbhit() != 0)
-	{
-		char input = _getch();
-
-		if (input == '1')
-		{
-			CLIENT->Send(Protocol::ECHO, "EchoMessage", strlen("EchoMessage"));
-			std::cout << "Send Echo Protocol" << std::endl;
-		}
-
-		if (input == '2')
-		{
-			CLIENT->Send(Protocol::BROADCAST, "BroadcastMessage", strlen("BroadcastMessage"));
-			std::cout << "Send Broadcast Protocol" << std::endl;
-		}
-	}
-
-	Recv();
+	time += curr - prev;
+	prev = curr;
 }
 
 void Player::Release()

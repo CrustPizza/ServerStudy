@@ -3,7 +3,7 @@
 *	GameProcess.h			*
 *							*
 *	Created : 2022/05/16	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #pragma once
@@ -13,7 +13,10 @@ class Player;
 class GameProcess
 {
 	static GameProcess gameInstance;
+
 	Player* player;
+	Player* remotePlayer;
+
 	bool isLaunch;
 
 private:
@@ -30,4 +33,7 @@ public:
 
 	void Run();
 	void Stop();
+
+	Player* GetPlayer();
+	Player* GetOpponent();
 };

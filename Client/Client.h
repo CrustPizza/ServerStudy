@@ -3,19 +3,23 @@
 *	Client.h				*
 *							*
 *	Created : 2022/05/15	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #pragma once
 #include "../Network/TCPSocket.h"
 #include "../Network/Protocol.h"
 
+class PlayerManager;
+
 class Client
 {
+	PlayerManager* playerManager;
+
 	static Client clientInstance;
+
 	TCPSocket*	clientSocket;
 	WSAEVENT	eventHandle;
-	bool		isLaunch;
 
 private:
 	Client();
@@ -27,8 +31,10 @@ public:
 	bool Connect(Endpoint& target);
 	bool Connect(Endpoint&& target);
 	void Disconnect();
-	void EventLoop();
+	void Update();
 
 	bool Send(Protocol protocol, const char* data, UINT size);
 	bool Recv(char* data, UINT size);
+
+	void SetPlayerManager(PlayerManager* playerManager);
 };
