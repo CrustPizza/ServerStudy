@@ -17,6 +17,7 @@
     <ClInclude Include="Endpoint.h">
       <Filter>Endpoint</Filter>
     </ClInclude>
+    <ClInclude Include="Protocol.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Endpoint.h" />
+    <ClInclude Include="Protocol.h" />
     <ClInclude Include="SocketInterface.h" />
     <ClInclude Include="TCPSocket.h" />
   </ItemGroup>
