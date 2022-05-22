@@ -3,7 +3,7 @@
 *	Player.h				*
 *							*
 *	Created : 2022/05/16	*
-*	Updated : 2022/05/16	*
+*	Updated : 2022/05/22	*
 *****************************/
 
 #pragma once
@@ -25,4 +25,8 @@ public:
 	void Init();
 	void Update();
 	void Release();
+
+	bool Recv();
+	bool Send();
+	bool Close();
 };

@@ -113,20 +113,24 @@ void Client::EventLoop()
 	}
 }
 
-bool Client::Send(const char* data, UINT size)
+bool Client::Send(Protocol protocol, const char* data, UINT size)
 {
 	if (size <= 0)
 		return false; // 예외 처리
 
-	// 2Byte를 Packet Size에 할당
-	std::string str = "  ";
+	// 처음 2Byte Packet Size
+	// 뒤의 2Byte Protocol
+	std::string str = "    ";
 
 	for (int i = 0; i < 2; i++)
+	{
 		str[1 - i] = (size >> (i * 8)) & 0xff;
+		str[3 - i] = (static_cast<UINT>(protocol) >> (i * 8)) & 0xff;
+	}
 
 	str += data;
 
-	return clientSocket->SendStream(str.c_str(), size + 2);
+	return clientSocket->SendStream(str.c_str(), size + 4);
 }
 
 bool Client::Recv(char* data, UINT size)
@@ -139,7 +143,10 @@ bool Client::Recv(char* data, UINT size)
 		return false; // 예외 처리
 
 	// Packet Size 계산
-	UINT packetSize = (data[0] << 8) + data[1];
+	UINT packetSize = (data[0] << 8) + data[1] + 2;
+
+	if (size < packetSize)
+		return false; // 패킷 사이즈를 다 받아가지 못함
 
 	return clientSocket->RecvStream(data, packetSize);
 }

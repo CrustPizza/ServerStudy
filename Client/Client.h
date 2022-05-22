@@ -8,6 +8,7 @@
 
 #pragma once
 #include "../Network/TCPSocket.h"
+#include "../Network/Protocol.h"
 
 class Client
 {
@@ -28,6 +29,6 @@ public:
 	void Disconnect();
 	void EventLoop();
 
-	bool Send(const char* data, UINT size);
+	bool Send(Protocol protocol, const char* data, UINT size);
 	bool Recv(char* data, UINT size);
 };
